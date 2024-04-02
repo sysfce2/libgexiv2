@@ -31,6 +31,7 @@
 
 #include <exiv2/exiv2.hpp>
 
+namespace compat {
 #if EXIV2_TEST_VERSION(0,27,99)
 using image_ptr = Exiv2::Image::UniquePtr;
 #else
@@ -39,6 +40,7 @@ using image_ptr = Exiv2::Image::UniquePtr;
 using image_ptr = Exiv2::Image::AutoPtr;
 #pragma GCC diagnostic pop
 #endif
+} // namespace util
 
 
 // -----------------------------------------------------------------------------
@@ -89,7 +91,7 @@ static void gexiv2_metadata_finalize (GObject *object);
 static void gexiv2_metadata_set_comment_internal (GExiv2Metadata *self, const gchar *new_comment);
 
 static gboolean gexiv2_metadata_open_internal (GExiv2Metadata *self, GError **error);
-static gboolean gexiv2_metadata_save_internal (GExiv2Metadata *self, image_ptr image, GError **error);
+static gboolean gexiv2_metadata_save_internal(GExiv2Metadata* self, compat::image_ptr image, GError** error);
 
 static void gexiv2_metadata_init (GExiv2Metadata *self) {
     self->priv = (GExiv2MetadataPrivate*) gexiv2_metadata_get_instance_private(self);
@@ -386,7 +388,7 @@ gboolean gexiv2_metadata_from_app1_segment(GExiv2Metadata* self, const guint8* d
     return FALSE;
 }
 
-static gboolean gexiv2_metadata_save_internal (GExiv2Metadata *self, image_ptr image, GError **error) {
+static gboolean gexiv2_metadata_save_internal(GExiv2Metadata* self, compat::image_ptr image, GError** error) {
     g_return_val_if_fail(GEXIV2_IS_METADATA(self), FALSE);
     g_return_val_if_fail(self->priv != nullptr, FALSE);
     g_return_val_if_fail(self->priv->image.get() != nullptr, FALSE);
@@ -513,7 +515,7 @@ GBytes* gexiv2_metadata_as_bytes(GExiv2Metadata* self, GBytes* bytes, GError** e
     g_return_val_if_fail(GEXIV2_IS_METADATA(self), FALSE);
 
     try {
-        image_ptr image;
+        compat::image_ptr image;
         if (bytes == nullptr) {
             auto& internalIo = self->priv->image->io();
             auto data = internalIo.mmap();
